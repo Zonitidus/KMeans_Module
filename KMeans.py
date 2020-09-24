@@ -53,7 +53,7 @@ class KMeans():
         self.clasified_data[min_distance[1]].append(data_points)
 
     
-      old_centroids = dict(self.centroids)
+      prev_centroids = dict(self.centroids)
 
       for key in self.clasified_data:
         
@@ -62,7 +62,7 @@ class KMeans():
         points = self.clasified_data[key]
         self.centroids[key] = np.average(self.clasified_data[key], axis = 0)
         
-"""
+
       optimized = True
 
       for c in self.centroids:
@@ -75,15 +75,11 @@ class KMeans():
       if optimized:
         break
 
-    def predict(self,data):
-        distances = [np.linalg.norm(data - self.centroids[centroid]) for centroid in self.centroids]
-        classification = distances.index(min(distances))
-        return classification
+  def predict(self,data):
+      distances = [np.linalg.norm(data - self.centroids[centroid]) for centroid in self.centroids]
+      classification = distances.index(min(distances))
+      return classification
 
-"""
-
-      
-        
 
   def euclidean_distance(self, x, y):
     return np.sqrt(np.sum(np.square(x-y)))
