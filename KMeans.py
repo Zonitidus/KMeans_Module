@@ -1,32 +1,23 @@
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import preprocessing
+from matplotlib import style
+style.use('ggplot')
+import numpy as np
+
+
 
 data1 = pd.read_fwf('a1.txt', header = None)
 #plt.scatter(data1[0].values, data1[1].values)
 
-#plt.show()
 
+normalized_df = ((data1-data1.mean())/data1.std()).to_numpy()
 
-
-df = data1.T
-
-"""
-x = df.values # is a numpy array
-min_max_scaler = preprocessing.MinMaxScaler()
-x_scaled = min_max_scaler.fit_transform(x)
-df = pd.DataFrame(x_scaled)
-"""
-
-normalized_df = (df-df.mean())/df.std()
 
 
 class KMeans():
   
-
   """
-    Description: Inicializa un nuevo objeto de  
+    Inicializa un nuevo objeto de tipo KMeans 
     param: k - número de clusters
     param: max_iter - número máximo de iteraciones
     pre: k esté definida
@@ -42,7 +33,7 @@ class KMeans():
 
 
   """
-    Description: Entrena el modelo definiendo los centroides y modificándolos según la posición de los puntos asociados a dichos centroides.
+    Description: Define los centroides y los modifica según el promedio de los puntos asociados a ellos.
     param: data - Dataset a analizar
     pre: k debe estar definido; data debe
     post: Se definen los clusters luego de max_iter iteraciones 
@@ -53,7 +44,6 @@ class KMeans():
 
     #Se definen como centroides los primeros k elementos del dataset
     for centroid in range(self.k):
-
       self.centroids[centroid] = data[centroid] 
 
     #Se repite el proceso de clustering un número específico de veces (max_iter)
@@ -66,10 +56,11 @@ class KMeans():
         self.clasified_data[cluster] = []
 
       #Relaciona los datapoints con su cluster más cercano
-      for data_points in data:
-        min_distance = self.min_distance(data) 
-        self.clasified_data[min_distance[1]].append(data_points) # Agrega el datapoint al diccionario que clasifica los datos en los diferentes clusters
-
+      for data_point in data:
+        
+        min_distance = self.min_distance(data, data_point) 
+        self.clasified_data[min_distance[1]].append(data_point) # Agrega el datapoint al diccionario que clasifica los datos en los diferentes clusters
+        
       #Se guarda una copia de los centroides anteriores
       prev_centroids = dict(self.centroids)
 
@@ -77,15 +68,13 @@ class KMeans():
       for key in self.clasified_data:
         
         #print(type(key), key)
-
-        points = self.clasified_data[key]
         self.centroids[key] = np.average(self.clasified_data[key], axis = 0)
         
       #Partimos del supuesto que los clusters son óptimos
       optimized = True
 
       #Comparamos los clusters anteriores con los que acabamos da calcular. 
-      # Si no se encuentran en el rango de tolerancia, continuamos con las iteraciones (max_iter)
+      # Si se mueven más del rango de toleracia, continuamos con las iteraciones (max_iter)
       for c in self.centroids:
 
         original_centroid = prev_centroids[c]
@@ -97,50 +86,52 @@ class KMeans():
       if optimized:
         break
 
-
-
-
   """
-    Description: 
-    param:
-    pre:
-    post:
-  """
-  def predict(self,data):
-      distances = [np.linalg.norm(data - self.centroids[centroid]) for centroid in self.centroids]
-      classification = distances.index(min(distances))
-      return classification
-
-  """
-    Description:
-    param:
-    pre:
-    post:
+    Description: Distancia euclidiana entre puntos
+    param: x - Punto inicial
+    param: y - Punto final
+    pre: Ambos puntos 'x' y 'y' están definidos
+    post: Se calcula la distancia entre ambos puntos.
   """
   def euclidean_distance(self, x, y):
     return np.sqrt(np.sum(np.square(x-y)))
 
-  def min_distance(self, data):
+  def min_distance(self, data, datapoint):
 
     min_distance = [0,0]
 
     for i in range(self.k):
             
-      distance = self.euclidean_distance(self.centroids[i], data[i])
+        distance = self.euclidean_distance(self.centroids[i], datapoint)
 
-      if min_distance[0] == 0:
-        min_distance[0] = distance
-        min_distance[1] = i
-      else:
-                
-        if min_distance[0] > distance:
+        if min_distance[0] == 0:
             min_distance[0] = distance
             min_distance[1] = i
+        else:
+                
+            if min_distance[0] > distance:
+              min_distance[0] = distance
+              min_distance[1] = i
 
     return min_distance
 
 
 
+clf = KMeans(k = 6)
+clf.fit(normalized_df)
+
+for centroid in clf.centroids:
+    plt.scatter(clf.centroids[centroid][0], clf.centroids[centroid][1],
+                marker="x", color="k", s=150, linewidths=5)
+
+colors = 10*["g","r","c","b","k"]
+
+for classification in clf.clasified_data:
+    color = colors[classification]
+    for featureset in clf.clasified_data[classification]:
+        plt.scatter(featureset[0], featureset[1], color=color, s=80, linewidths=2)
+
+plt.show()
 
 
 
@@ -161,31 +152,3 @@ class KMeans():
 
 
 
-
-
-
-
-
-
-X = np.array([[1, 2],
-              [1.5, 1.8],
-              [5, 8 ],
-              [8, 8],
-              [1, 0.6],
-              [9,11]])
-
-
-
-
-km = KMeans(2)
-km.fit(X)
-
-print((km.clasified_data[0]))
-
-#plt.scatter(km.clasified_data[0][0], km.clasified_data[0][1])
-#plt.scatter(km.clasified_data[1][0], km.clasified_data[1][1])
-
-#plt.plot(km.clasified_data[0], "g")
-#plt.plot(km.clasified_data[1], "r")
-        
-#plt.show()
