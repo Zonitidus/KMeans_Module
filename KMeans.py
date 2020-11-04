@@ -46,20 +46,19 @@ class KMeans():
     for centroid in range(self.k):
       self.centroids[centroid] = data[centroid] 
 
-    #Se repite el proceso de clustering un número específico de veces (max_iter)
-    for iterations in range(self.max_iter):
+  def step(self, data):
 
-      self.clasified_data = {}
+    self.clasified_data = {}
 
       #Se inicializa una lista vacía para cada cluster en el diccionario de datos clasificados
-      for cluster in range(self.k):
-        self.clasified_data[cluster] = []
+    for cluster in range(self.k):
+      self.clasified_data[cluster] = []
 
       #Relaciona los datapoints con su cluster más cercano
-      for data_point in data:
+    for data_point in data:
         
-        min_distance = self.min_distance(data, data_point) 
-        self.clasified_data[min_distance[1]].append(data_point) # Agrega el datapoint al diccionario que clasifica los datos en los diferentes clusters
+      min_distance = self.min_distance(data, data_point) 
+      self.clasified_data[min_distance[1]].append(data_point) # Agrega el datapoint al diccionario que clasifica los datos en los diferentes clusters
         
       #Se guarda una copia de los centroides anteriores
       prev_centroids = dict(self.centroids)
@@ -82,9 +81,8 @@ class KMeans():
         if np.sum((current_centroid - original_centroid)/original_centroid*100.0) > 0.001:
           #print(np.sum((current_centroid-original_centroid)/original_centroid*100.0))
           optimized = False
-
-      if optimized:
-        break
+      
+      return optimized
 
   """
     Description: Distancia euclidiana entre puntos
