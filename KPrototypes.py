@@ -5,16 +5,15 @@ style.use('ggplot')
 import numpy as np
 
 
+data1 = pd.read_csv('super.csv', sep=',')  
 
-data1 = pd.read_fwf('a1.txt', header = None)
-#plt.scatter(data1[0].values, data1[1].values)
-
+print(data1)
 
 normalized_df = ((data1-data1.mean())/data1.std()).to_numpy()
 
 
 
-class KMeans():
+class KPrototypes():
   
   """
     Inicializa un nuevo objeto de tipo KMeans 
@@ -23,11 +22,15 @@ class KMeans():
     pre: k esté definida
     post: se crea un nuevo objeto de tipo Kmeans
   """
-  def __init__(self, k, max_iter=300):
+  def __init__(self, k, cat, plot_var, max_iter=300):
     self.k = k 
     self.max_iter = max_iter
     self.centroids = {} #Diccionario que almacena los puntos del dataset que serán usados como centroides.
 
+    self.categorical = cat #Índices de las variables categóricas
+    
+    self.plot_var = plot_var
+    self.data = 0 
     self.clasified_data = {} #Diccionario que almacena las listas de puntos que pertenecen a cada centroide
   
 
@@ -41,6 +44,7 @@ class KMeans():
   def fit(self, data):
     
     self.centroids = {}
+    self.data = data
 
     #Se definen como centroides los primeros k elementos del dataset
     for centroid in range(self.k):
@@ -97,13 +101,32 @@ class KMeans():
     return np.sqrt(np.sum(np.square(x-y)))
 
 
+  def dissimilarities_function(self, x, y):
+
+    cost = 0
+    for j in range(0, len(x)):
+
+      if(x[j] != y[j]):
+        cost += 1
+
+    return cost
+    
+
+  def cost(self, x, y):
+
+    columns =  self.data.shape[-1]
+    numerical = list(set( range(0,columns) ) - set(self.categorical))
+
+    return self.dissimilarities_function(x[self.categorical], y[self.categorical]) + self.euclidean_distance(x[numerical], y[numerical])
+
+
   def min_distance(self, data, datapoint):
 
     min_distance = [0,0]
 
     for i in range(self.k):
             
-        distance = self.euclidean_distance(self.centroids[i], datapoint)
+        distance = self.cost(self.centroids[i], datapoint)
 
         if min_distance[0] == 0:
             min_distance[0] = distance
@@ -118,7 +141,7 @@ class KMeans():
 
 
 
-clf = KMeans(k = 6)
+clf = KPrototypes(cat = [0, 1], plot_var= [3,4], k = 6)
 clf.fit(normalized_df)
 
 for centroid in clf.centroids:
@@ -130,26 +153,6 @@ colors = 10*["g","r","c","b","k"]
 for classification in clf.clasified_data:
     color = colors[classification]
     for featureset in clf.clasified_data[classification]:
-        plt.scatter(featureset[0], featureset[1], color=color, s=80, linewidths=2)
+        plt.scatter(featureset[clf.plot_var[0]], featureset[clf.plot_var[1]], color=color, s=80, linewidths=2)
 
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
