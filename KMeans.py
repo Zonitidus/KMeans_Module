@@ -6,9 +6,10 @@ import numpy as np
 
 
 
-data1 = pd.read_fwf('a1.txt', header = None)
+data1 = pd.read_fwf('datasets/a1.txt', header = None)
 #plt.scatter(data1[0].values, data1[1].values)
 
+print(data1)
 
 normalized_df = ((data1-data1.mean())/data1.std()).to_numpy()
 

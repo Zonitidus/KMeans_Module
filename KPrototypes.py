@@ -5,7 +5,7 @@ style.use('ggplot')
 import numpy as np
 
 
-data1 = pd.read_csv('super.csv', sep=',')  
+data1 = pd.read_csv('datasets/super.csv', sep=',')  
 
 print(data1)
 
@@ -87,6 +87,7 @@ class KPrototypes():
           optimized = False
 
     return optimized
+    
   """
     Description: Distancia euclidiana entre puntos
     param: x - Punto inicial
